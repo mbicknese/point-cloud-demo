@@ -1,0 +1,14 @@
+---
+services:
+    http:
+        image: 'node:22-alpine'
+        working_dir: /home/node
+        volumes:
+            -   ./:/home/node
+        command:
+            - npx
+            - --yes
+            - reload
+        ports:
+            -   8080:8080
+        user: node

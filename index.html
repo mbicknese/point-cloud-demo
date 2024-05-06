@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Point cloud rendering demo</title>
+
+		<link rel="stylesheet" href="//unpkg.com/open-props@1.7.4" />
+		<link rel="stylesheet" href="//unpkg.com/open-props@1.7.4/normalize.min.css" />
+
+		<style>
+			body {
+				height: 100dvh;
+				padding: 0;
+			}
+
+			footer {
+				position: absolute;
+				bottom: 0;
+				padding: var(--size-2);
+				color: var(--text-2);
+			}
+
+			canvas {
+				position: absolute;
+				z-index: -1;
+				inset: 0;
+				width: 100dvw;
+				height: 100dvh;
+			}
+		</style>
+	</head>
+
+	<body>
+		<main x-data="points">
+			<canvas id="glcanvas" x-effect="render(mutations)"></canvas>
+
+			<section>
+				<h2>Controls</h2>
+				<button type="button" @click="add">Add</button>
+			</section>
+		</main>
+
+		<footer>Made with ♥ by Maarten Bicknese</footer>
+
+		<script src="/main.js" type="module"></script>
+		<script
+			src="//unpkg.com/alpinejs@3.13.10"
+			defer
+			integrity="sha512-dY1RrE1UTNd/Y4JdiPVn8EAb4rcAlPqYQNn2SSQdPP5sLfCDnvRS14gbYJnSRkc3DWiL7ggupu+bCw590rcXyg=="
+			crossorigin="anonymous"
+		></script>
+	</body>
+</html>
