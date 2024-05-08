@@ -57,6 +57,7 @@
 				</label>
 				<template x-if="selected">
 					<fieldset>
+						<legend>Position</legend>
 						<label>
 							X
 							<input
@@ -94,6 +95,7 @@
 				</template>
 				<template x-if="selected">
 					<fieldset>
+						<legend>Rotation</legend>
 						<label>
 							X
 							<input
@@ -123,6 +125,44 @@
 								min="-1"
 								max="1"
 								x-model="selected.rotation.z"
+								@input="rotate"
+								step="0.01"
+							/>
+						</label>
+					</fieldset>
+				</template>
+				<template x-if="selected">
+					<fieldset>
+						<legend>Scale</legend>
+						<label>
+							X
+							<input
+								type="range"
+								min="0"
+								max="2"
+								x-model="selected.scale.x"
+								@input="rotate"
+								step="0.01"
+							/>
+						</label>
+						<label>
+							Y
+							<input
+								type="range"
+								min="0"
+								max="2"
+								x-model="selected.scale.y"
+								@input="rotate"
+								step="0.01"
+							/>
+						</label>
+						<label>
+							Z
+							<input
+								type="range"
+								min="0"
+								max="2"
+								x-model="selected.scale.z"
 								@input="rotate"
 								step="0.01"
 							/>

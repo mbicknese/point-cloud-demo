@@ -62,4 +62,9 @@ export default () => ({
 		this.selected.rotation.needsUpdate = true;
 		local.render();
 	},
+
+	scale() {
+		this.selected.scale.needsUpdate = true;
+		local.render();
+	},
 });
