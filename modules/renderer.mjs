@@ -29,6 +29,7 @@ export default () => ({
 
 	render() {
 		this.scene.clear();
+		this.scene.add(new THREE.AxesHelper(0.1));
 		if (this.points != null) this.scene.add(this.points);
 		this.cubes.forEach((c) => {
 			this.scene.add(c);
@@ -59,7 +60,7 @@ export default () => ({
 		const direction = new THREE.Vector2((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
 		this.raycaster.setFromCamera(direction, this.camera);
 
-		const intersects = this.raycaster.intersectObjects(this.scene.children.filter(({ type }) => type !== "Points"));
+		const intersects = this.raycaster.intersectObjects(this.scene.children.filter(({ type }) => type === "Mesh"));
 		return intersects[0]?.object;
 	},
 });
