@@ -9,6 +9,9 @@ export default () => ({
 	loader: new PCDLoader(),
 	renderer: new THREE.WebGLRenderer({ antialias: true, canvas: window.glcanvas, alpha: true }),
 	scene: new THREE.Scene(),
+	raycaster: new THREE.Raycaster(),
+	points: null,
+	cubes: [],
 
 	init() {
 		this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -25,6 +28,11 @@ export default () => ({
 	},
 
 	render() {
+		this.scene.clear();
+		if (this.points != null) this.scene.add(this.points);
+		this.cubes.forEach((c) => {
+			this.scene.add(c);
+		});
 		this.renderer.render(this.scene, this.camera);
 	},
 
@@ -33,9 +41,25 @@ export default () => ({
 	 */
 	load(dataURI) {
 		this.loader.load(dataURI, (points) => {
-			this.scene.clear();
-			this.scene.add(points);
+			this.points = points;
 			this.render();
 		});
+	},
+
+	addCube(cube) {
+		this.cubes = [...this.cubes, cube];
+	},
+
+	/**
+	 * @param {number} x
+	 * @param {number} y
+	 * @return {THREE.Object3D|undefined} - first found object or undefined
+	 */
+	findAt(x, y) {
+		const direction = new THREE.Vector2((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
+		this.raycaster.setFromCamera(direction, this.camera);
+
+		const intersects = this.raycaster.intersectObjects(this.scene.children.filter(({ type }) => type !== "Points"));
+		return intersects[0]?.object;
 	},
 });

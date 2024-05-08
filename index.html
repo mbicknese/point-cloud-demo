@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -46,7 +46,7 @@
 
 	<body>
 		<main x-data="controls">
-			<canvas id="glcanvas"></canvas>
+			<canvas id="glcanvas" @mouseDown="setActive"></canvas>
 
 			<section>
 				<h2>Controls</h2>
@@ -55,6 +55,43 @@
 					Points
 					<input type="file" accept=".pcd" @change="handleLoad" />
 				</label>
+				<template x-if="selected">
+					<fieldset>
+						<label>
+							X
+							<input
+								type="range"
+								min="-1"
+								max="1"
+								x-model="selected.position.x"
+								@input="translate"
+								step="0.01"
+							/>
+						</label>
+						<label>
+							Y
+							<input
+								type="range"
+								min="-1"
+								max="1"
+								x-model="selected.position.y"
+								@input="translate"
+								step="0.01"
+							/>
+						</label>
+						<label>
+							Z
+							<input
+								type="range"
+								min="-1"
+								max="1"
+								x-model="selected.position.z"
+								@input="translate"
+								step="0.01"
+							/>
+						</label>
+					</fieldset>
+				</template>
 			</section>
 		</main>
 
