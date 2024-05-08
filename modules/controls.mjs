@@ -57,4 +57,9 @@ export default () => ({
 		this.selected.position.needsUpdate = true;
 		local.render();
 	},
+
+	rotate() {
+		this.selected.rotation.needsUpdate = true;
+		local.render();
+	},
 });
