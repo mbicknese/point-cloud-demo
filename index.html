@@ -51,6 +51,9 @@
 			<section>
 				<h2>Controls</h2>
 				<button type="button" @click="add">Add</button>
+				<button type="button" @click="remove" x-bind:disabled="selected == null">Remove</button>
+				<button type="button" @click="undo" x-bind:disabled="current === 0">Undo</button>
+				<button type="button" @click="redo" x-bind:disabled="current === mutations.length">Redo</button>
 				<label>
 					Points
 					<input type="file" accept=".pcd" @change="handleLoad" />
@@ -66,6 +69,7 @@
 								max="1"
 								x-model="selected.position.x"
 								@input="translate"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -77,6 +81,7 @@
 								max="1"
 								x-model="selected.position.y"
 								@input="translate"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -88,6 +93,7 @@
 								max="1"
 								x-model="selected.position.z"
 								@input="translate"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -104,6 +110,7 @@
 								max="1"
 								x-model="selected.rotation.x"
 								@input="rotate"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -115,6 +122,7 @@
 								max="1"
 								x-model="selected.rotation.y"
 								@input="rotate"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -126,6 +134,7 @@
 								max="1"
 								x-model="selected.rotation.z"
 								@input="rotate"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -141,7 +150,8 @@
 								min="0"
 								max="2"
 								x-model="selected.scale.x"
-								@input="rotate"
+								@input="scale"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -152,7 +162,8 @@
 								min="0"
 								max="2"
 								x-model="selected.scale.y"
-								@input="rotate"
+								@input="scale"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>
@@ -163,7 +174,8 @@
 								min="0"
 								max="2"
 								x-model="selected.scale.z"
-								@input="rotate"
+								@input="scale"
+								@change="storeMutation"
 								step="0.01"
 							/>
 						</label>

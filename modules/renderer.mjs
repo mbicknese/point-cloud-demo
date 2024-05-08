@@ -11,7 +11,7 @@ export default () => ({
 	scene: new THREE.Scene(),
 	raycaster: new THREE.Raycaster(),
 	points: null,
-	cubes: [],
+	cubes: {},
 
 	init() {
 		this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -31,7 +31,7 @@ export default () => ({
 		this.scene.clear();
 		this.scene.add(new THREE.AxesHelper(0.1));
 		if (this.points != null) this.scene.add(this.points);
-		this.cubes.forEach((c) => {
+		Object.values(this.cubes).forEach((c) => {
 			this.scene.add(c);
 		});
 		this.renderer.render(this.scene, this.camera);
@@ -47,8 +47,14 @@ export default () => ({
 		});
 	},
 
-	addCube(cube) {
-		this.cubes = [...this.cubes, cube];
+	addCube(id, cube) {
+		this.cubes[id] = cube;
+	},
+	removeCube(id) {
+		this.cubes = Object.fromEntries(Object.entries(this.cubes).filter(([current]) => current !== id));
+	},
+	clearCubes() {
+		this.cubes = {};
 	},
 
 	/**

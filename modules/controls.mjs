@@ -11,6 +11,7 @@ export default () => ({
 	fileReader: new FileReader(),
 	mutations: [],
 	selected: null,
+	current: 0,
 
 	init() {
 		local.init();
@@ -21,17 +22,55 @@ export default () => ({
 			},
 			false,
 		);
+		this.$watch("mutations", () => {
+			this.current = this.mutations.length;
+		});
 	},
 
 	add() {
-		this.mutations = [...this.mutations, { action: "add" }];
+		const id = crypto.randomUUID();
+		this._add(id);
+		this.mutations = [...this.mutations.slice(0, this.current), { action: "add", id: id }];
 
+		local.render();
+	},
+	_add(id) {
 		const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
 		const material = new THREE.MeshBasicMaterial({ color: colorDefault, opacity: 0.5 });
 		const cube = new THREE.Mesh(geometry, material);
-		local.addCube(cube);
+		cube.uuid = id;
+		local.addCube(id, cube);
+	},
+	remove() {
+		if (!this.selected) return;
+
+		this._remove(this.selected.uuid);
+		this.selected = null;
+
 		local.render();
 	},
+	_remove(id) {
+		this.mutations = [...this.mutations.slice(0, this.current), , { action: "remove", id }];
+		local.removeCube(id);
+	},
+	storeMutation() {
+		if (!this.selected) return;
+
+		const { position, rotation, scale } = this.selected;
+		this.mutations = [
+			...this.mutations.slice(0, this.current),
+			{
+				action: "alter",
+				id: this.selected.uuid,
+				values: {
+					position: position.clone(),
+					rotation: rotation.clone(),
+					scale: scale.clone(),
+				},
+			},
+		];
+	},
+
 	/**
 	 * @param {Event} event
 	 */
@@ -65,6 +104,43 @@ export default () => ({
 
 	scale() {
 		this.selected.scale.needsUpdate = true;
+		local.render();
+	},
+
+	undo() {
+		this.current = Math.max(this.current - 1, 0);
+		this.timeTravel();
+	},
+	redo() {
+		this.current = Math.min(this.current + 1, this.mutations.length);
+		this.timeTravel();
+	},
+	timeTravel() {
+		local.clearCubes();
+		this.mutations.slice(0, this.current).forEach((mutation) => {
+			switch (mutation.action) {
+				case "add":
+					this._add(mutation.id);
+					break;
+				case "remove":
+					this._remove(mutation.id);
+					break;
+				case "alter":
+					const cube = local.cubes[mutation.id];
+					cube.rotation.set(
+						mutation.values.rotation.x,
+						mutation.values.rotation.y,
+						mutation.values.rotation.z,
+					);
+					cube.scale.set(mutation.values.scale.x, mutation.values.scale.y, mutation.values.scale.z);
+					cube.position.set(
+						mutation.values.position.x,
+						mutation.values.position.y,
+						mutation.values.position.z,
+					);
+					break;
+			}
+		});
 		local.render();
 	},
 });
