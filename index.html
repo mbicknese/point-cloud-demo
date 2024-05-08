@@ -9,6 +9,14 @@
 		<link rel="stylesheet" href="//unpkg.com/open-props@1.7.4/normalize.min.css" />
 
 		<style>
+			:where(html) {
+				--text-3: var(--gray-6);
+			}
+			@media (prefers-color-scheme: dark) {
+				:where(html) {
+					--text-3: var(--gray-6);
+				}
+			}
 			body {
 				height: 100dvh;
 				padding: 0;
@@ -37,9 +45,75 @@
 				width: 100dvw;
 				height: 100dvh;
 			}
+			main {
+				display: flex;
+				flex-direction: column;
+				align-content: center;
+				justify-content: space-around;
+				height: 100%;
+				padding-left: var(--size-8);
+			}
 			main > *:not(canvas) {
 				position: relative;
 				z-index: 1;
+			}
+
+			.control-block {
+				background: var(--surface-1);
+				display: flex;
+				flex-direction: column;
+				width: var(--size-11);
+				padding: var(--size-8) var(--size-4);
+				border-radius: var(--radius-4);
+				box-shadow: var(--shadow-4);
+			}
+			.control-block > h2 {
+				display: none;
+			}
+			.control-block :disabled {
+				color: var(--text-3);
+				cursor: default;
+			}
+			.control-block button,
+			.control-block .point-upload {
+				aspect-ratio: var(--ratio-square);
+				background: var(--surface-1);
+			}
+			.control-block button:hover:not(:disabled),
+			.control-block .point-upload:hover:not(:disabled) {
+				text-decoration: underline;
+			}
+
+			.point-upload {
+				cursor: pointer;
+				display: flex;
+				text-align: center;
+				flex-direction: column;
+				justify-content: space-evenly;
+			}
+			.point-upload input {
+				display: none;
+			}
+
+			.mutation-control {
+				position: absolute;
+				border: none;
+				background: var(--surface-1);
+				display: flex;
+				flex-direction: column;
+			}
+			.mutation-control legend {
+				position: relative;
+				top: var(--size-4);
+				margin-bottom: var(--size-4);
+			}
+			.mutation-control label {
+				display: flex;
+				align-content: center;
+				font-size: var(--font-size-0);
+			}
+			.mutation-control input {
+				margin-left: var(--size-2);
 			}
 		</style>
 	</head>
@@ -48,140 +122,150 @@
 		<main x-data="controls">
 			<canvas id="glcanvas" @mouseDown="setActive"></canvas>
 
-			<section>
+			<section class="control-block">
 				<h2>Controls</h2>
 				<button type="button" @click="add">Add</button>
 				<button type="button" @click="remove" x-bind:disabled="selected == null">Remove</button>
 				<button type="button" @click="undo" x-bind:disabled="current === 0">Undo</button>
 				<button type="button" @click="redo" x-bind:disabled="current === mutations.length">Redo</button>
-				<label>
-					Points
+				<label class="point-upload">
+					Upload points
 					<input type="file" accept=".pcd" @change="handleLoad" />
 				</label>
-				<template x-if="selected">
-					<fieldset>
-						<legend>Position</legend>
-						<label>
-							X
-							<input
-								type="range"
-								min="-1"
-								max="1"
-								x-model="selected.position.x"
-								@input="translate"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-						<label>
-							Y
-							<input
-								type="range"
-								min="-1"
-								max="1"
-								x-model="selected.position.y"
-								@input="translate"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-						<label>
-							Z
-							<input
-								type="range"
-								min="-1"
-								max="1"
-								x-model="selected.position.z"
-								@input="translate"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-					</fieldset>
-				</template>
-				<template x-if="selected">
-					<fieldset>
-						<legend>Rotation</legend>
-						<label>
-							X
-							<input
-								type="range"
-								min="-1"
-								max="1"
-								x-model="selected.rotation.x"
-								@input="rotate"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-						<label>
-							Y
-							<input
-								type="range"
-								min="-1"
-								max="1"
-								x-model="selected.rotation.y"
-								@input="rotate"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-						<label>
-							Z
-							<input
-								type="range"
-								min="-1"
-								max="1"
-								x-model="selected.rotation.z"
-								@input="rotate"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-					</fieldset>
-				</template>
-				<template x-if="selected">
-					<fieldset>
-						<legend>Scale</legend>
-						<label>
-							X
-							<input
-								type="range"
-								min="0"
-								max="2"
-								x-model="selected.scale.x"
-								@input="scale"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-						<label>
-							Y
-							<input
-								type="range"
-								min="0"
-								max="2"
-								x-model="selected.scale.y"
-								@input="scale"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-						<label>
-							Z
-							<input
-								type="range"
-								min="0"
-								max="2"
-								x-model="selected.scale.z"
-								@input="scale"
-								@change="storeMutation"
-								step="0.01"
-							/>
-						</label>
-					</fieldset>
-				</template>
 			</section>
+
+			<template x-if="selected">
+				<fieldset
+					class="mutation-control position"
+					:style="`left: calc(${((controlPosition.x + 1) / 2) * window.innerWidth}px + var(--size-11)); top: ${(((controlPosition.y * -2.5) + 1) / 2) * window.innerHeight}px`"
+				>
+					<legend>Position</legend>
+					<label>
+						X
+						<input
+							type="range"
+							min="-1"
+							max="1"
+							x-model="selected.position.x"
+							@input="translate"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+					<label>
+						Y
+						<input
+							type="range"
+							min="-0.25"
+							max="0.25"
+							x-model="selected.position.y"
+							@input="translate"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+					<label>
+						Z
+						<input
+							type="range"
+							min="-1"
+							max="1"
+							x-model="selected.position.z"
+							@input="translate"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+				</fieldset>
+			</template>
+			<template x-if="selected">
+				<fieldset
+					class="mutation-control rotation"
+					:style="`left: calc(${((controlPosition.x + 1) / 2) * window.innerWidth}px - var(--size-10)); top: calc(${(((controlPosition.y * -2.5) + 1) / 2) * window.innerHeight}px + var(--size-11))`"
+				>
+					<legend>Rotation</legend>
+					<label>
+						X
+						<input
+							type="range"
+							min="-1"
+							max="1"
+							x-model="selected.rotation.x"
+							@input="rotate"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+					<label>
+						Y
+						<input
+							type="range"
+							min="-1"
+							max="1"
+							x-model="selected.rotation.y"
+							@input="rotate"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+					<label>
+						Z
+						<input
+							type="range"
+							min="-1"
+							max="1"
+							x-model="selected.rotation.z"
+							@input="rotate"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+				</fieldset>
+			</template>
+			<template x-if="selected">
+				<fieldset
+					class="mutation-control scale"
+					:style="`left: calc(${((controlPosition.x + 1) / 2) * window.innerWidth}px - var(--size-14)); top: ${(((controlPosition.y * -2.5) + 1) / 2) * window.innerHeight}px`"
+				>
+					<legend>Scale</legend>
+					<label>
+						X
+						<input
+							type="range"
+							min="0"
+							max="2"
+							x-model="selected.scale.x"
+							@input="scale"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+					<label>
+						Y
+						<input
+							type="range"
+							min="0"
+							max="2"
+							x-model="selected.scale.y"
+							@input="scale"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+					<label>
+						Z
+						<input
+							type="range"
+							min="0"
+							max="2"
+							x-model="selected.scale.z"
+							@input="scale"
+							@change="storeMutation"
+							step="0.01"
+						/>
+					</label>
+				</fieldset>
+			</template>
 		</main>
 
 		<footer>Made with ♥ by Maarten Bicknese</footer>

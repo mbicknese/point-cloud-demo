@@ -12,6 +12,7 @@ export default () => ({
 	mutations: [],
 	selected: null,
 	current: 0,
+	controlPosition: { x: 0, y: 0 },
 
 	init() {
 		local.init();
@@ -56,6 +57,7 @@ export default () => ({
 	storeMutation() {
 		if (!this.selected) return;
 
+		this.controlPosition = { x: +this.selected.position.x, y: +this.selected.position.y };
 		const { position, rotation, scale } = this.selected;
 		this.mutations = [
 			...this.mutations.slice(0, this.current),
@@ -88,6 +90,7 @@ export default () => ({
 		this.selected = local.findAt(event.clientX, event.clientY);
 		if (this.selected) {
 			this.selected.material.color.set(colorSelected);
+			this.controlPosition = { x: this.selected.position.x, y: this.selected.position.y };
 		}
 		local.render();
 	},
